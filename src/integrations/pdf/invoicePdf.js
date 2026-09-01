@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import PDFDocument from "pdfkit";
 
 import company from "../../config/company.js";
+// ✅ FIX 1: Missing logger import
 import logger from "../../config/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -61,7 +62,7 @@ class InvoicePdf {
         writeStream.destroy();
       }
 
-      // Cleanup partial or corrupted file on failure
+      // ✅ FIX 2: Delete corrupted PDF if exists
       if (filePath) {
         try {
           await fs.unlink(filePath);
@@ -254,7 +255,7 @@ class InvoicePdf {
 
     const amount = Number(order.amount);
     const taxRate = company.gstRate ? company.gstRate / 100 : 0.18;
-    // Calculate tax and subtotal with 2 decimal precision
+    // ✅ FIX 4: Round to 2 decimal places to avoid floating point errors
     const subtotal = Number((amount / (1 + taxRate)).toFixed(2));
     const tax = Number((amount - subtotal).toFixed(2));
 
@@ -290,7 +291,7 @@ class InvoicePdf {
       company.terms.forEach((term, index) => {
         if (doc.y > 700) {
           doc.addPage();
-          // Add spacing after page break
+          // ✅ FIX 3: Add padding after new page
           doc.moveDown();
         }
         doc.text(`${index + 1}. ${term}`);

@@ -195,7 +195,7 @@ class WebhookService {
       return;
     }
 
-    // Prevent duplicate processing if payment already succeeded
+    // ✅ FIX: Prevent duplicate business processing
     if (payment.status === "SUCCESS") {
       logger.info({
         event: "PAYMENT_ALREADY_CONFIRMED",
@@ -247,7 +247,7 @@ class WebhookService {
       return;
     }
 
-    // Prevent duplicate processing if payment already failed
+    // ✅ FIX: Prevent duplicate business processing
     if (payment.status === "FAILED") {
       logger.info({
         event: "PAYMENT_ALREADY_FAILED",
@@ -295,7 +295,7 @@ class WebhookService {
       return;
     }
 
-    // Prevent duplicate processing if payment already failed
+    // ✅ FIX: Prevent duplicate business processing
     if (payment.status === "FAILED") {
       logger.info({
         event: "PAYMENT_ALREADY_FAILED",
@@ -357,8 +357,10 @@ class WebhookService {
       return;
     }
 
-    // Payment status is updated by handleRefundUpdated() after verifying cumulative balance
-    // to prevent partial refunds from prematurely marking payment as REFUNDED.
+    // ✅ FIX: Removed premature payment status update.
+    // Payment status is correctly updated to REFUNDED only by
+    // handleRefundUpdated() after verifying totalRefunded >= payment.amount.
+    // This prevents partial refunds from incorrectly marking payment as REFUNDED.
 
     logger.info({
       event: "CHARGE_REFUNDED_HANDLED",
@@ -514,7 +516,7 @@ class WebhookService {
       return new Prisma.Decimal(0);
     }
 
-    // Only count SUCCEEDED refunds towards cumulative total
+    // ✅ FIX 1: Only count SUCCEEDED refunds
     return refunds
       .filter((refund) => refund.status === "SUCCEEDED")
       .reduce(

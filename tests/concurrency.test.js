@@ -9,7 +9,7 @@ import webhookRepository from "../src/repositories/webhook.repository.js";
 import webhookService from "../src/services/webhook.service.js";
 import stripeWebhook from "../src/integrations/stripe/webhook.js";
 
-describe("High-Concurrency & Stress Test Suite", () => {
+describe("Phase 2 High-Concurrency & Stress Test Suite", () => {
   it("STRESS TEST: 100 concurrent webhook events with identical eventId create exactly 1 DB record", async () => {
     const webhookStore = new Map();
 

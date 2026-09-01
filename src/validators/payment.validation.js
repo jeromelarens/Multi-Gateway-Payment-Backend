@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Unified Payment Creation Schema
+ * Unified Payment Creation Schema (Phase 1)
  */
 export const createPaymentSchema = z.object({
   amount: z

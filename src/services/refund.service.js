@@ -224,7 +224,7 @@ class RefundService {
     |--------------------------------------------------------------------------
     */
 
-    // Deterministic idempotency key for provider API call
+    // ✅ FIX 2: Deterministic idempotency key — no Date.now()
     const stableIdempotencyKey =
       idempotencyKey ??
       `${payment.paymentIntentId}-${refundAmount.toString()}-${validatedReason || "default"}`;
@@ -341,7 +341,8 @@ class RefundService {
             );
           }
 
-          // Generate new internal refund number on collision retry
+          // ✅ FIX: Generate NEW refund number for DB retry only
+          // ⚠️ Note: Stripe metadata still has old refundNumber — acceptable for debugging
           refundNumber = this._generateRefundNumber();
           continue;
         }

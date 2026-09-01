@@ -1,8 +1,8 @@
 {
   "name": "payment-integration",
   "version": "1.0.0",
-  "description": "Production-grade multi-gateway payment integration backend supporting Stripe and Cashfree with request idempotency, immutable financial ledger, and asynchronous event-driven architecture.",
-  "main": "src/server.js",
+  "description": "",
+  "main": "Module.js",
   "directories": {
     "doc": "docs",
     "test": "tests"

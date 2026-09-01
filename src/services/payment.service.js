@@ -52,7 +52,7 @@ class PaymentService {
       );
     }
 
-    // 2. Currency validation (system supports INR)
+    // 2. Currency validation (Phase 1 supports INR)
     const normalizedCurrency = (currency || "INR").trim().toUpperCase();
     if (normalizedCurrency !== "INR") {
       throw ApiError.badRequest(

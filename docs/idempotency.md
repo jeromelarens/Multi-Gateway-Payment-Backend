@@ -4,7 +4,7 @@
 
 In financial payment systems, network retries and double-clicks by users can lead to duplicate payments and double-billing.
 
-The backend implements production-grade **Request-Level Idempotency** powered by PostgreSQL unique constraints and deterministic request body fingerprinting.
+Phase 1 implements production-grade **Request-Level Idempotency** powered by PostgreSQL unique constraints and deterministic request body fingerprinting.
 
 ---
 

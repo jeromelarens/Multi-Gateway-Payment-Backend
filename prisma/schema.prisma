@@ -71,6 +71,7 @@ enum ReconciliationDifferenceType {
   UNKNOWN
 }
 
+// ✅ FIX 2: RefundStatus aligned with Stripe terminology
 enum RefundStatus {
   PENDING
   SUCCEEDED
@@ -194,6 +195,7 @@ model Payment {
 model Refund {
   id String @id @default(cuid())
 
+  // ✅ FIX 1: Removed duplicate refundId, added refundNumber for internal tracking
   refundNumber   String? @unique
   stripeRefundId String  @unique
 
@@ -203,6 +205,7 @@ model Refund {
 
   failureReason String?
 
+  // ✅ FIX 2: Uses updated RefundStatus enum
   status RefundStatus @default(PENDING)
 
   paymentId String

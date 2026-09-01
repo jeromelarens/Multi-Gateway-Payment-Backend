@@ -112,8 +112,8 @@ graph TD
 
 ### Installation
 ```bash
-git clone https://github.com/jeromelarens/Multi-Gateway-Payment-Backend.git
-cd Multi-Gateway-Payment-Backend
+git clone https://github.com/your-org/payment-integration.git
+cd payment-integration
 npm install
 ```
 
@@ -147,7 +147,7 @@ The automated test suite runs via the native Node.js test runner (`node --test`)
 npm test
 ```
 
-> **Note on External Provider Testing:** Stripe and Cashfree integrations are implemented behind provider adapters and covered by automated tests. End-to-end provider testing requires external sandbox credentials and is intentionally not included in this repository.
+> **Note on External Provider Testing:** Stripe and Cashfree integrations are implemented through provider adapters and covered by automated tests. End-to-end provider testing requires external sandbox credentials and is intentionally not included.
 
 ### Test Coverage (84 tests across 15 suites):
 * **Authentication**: Registration, login, password hashing, timing attack protection.
@@ -173,14 +173,13 @@ npm test
 ## Documentation Index
 
 - [Architecture Overview](docs/architecture.md)
-- [Unified Payment Flow](docs/payment-flow.md)
-- [Gateway Architecture](docs/gateway-architecture.md)
 - [Asynchronous Processing](docs/async-processing.md)
-- [Queue Architecture](docs/queue-architecture.md)
 - [Webhook Reliability & DLQ](docs/webhook-reliability.md)
-- [Request-Level Idempotency](docs/idempotency.md)
 - [Transaction Ledger](docs/transaction-ledger.md)
 - [Reconciliation Engine](docs/reconciliation.md)
 - [Audit Logging](docs/audit-logging.md)
-- [Authentication & Authorization](docs/authentication.md)
+- [Queue Architecture](docs/queue-architecture.md)
 - [API Specification](docs/api.md)
+- [Authentication Guide](docs/authentication.md)
+- [Idempotency Guide](docs/idempotency.md)
+- [Gateway Architecture](docs/gateway-architecture.md)

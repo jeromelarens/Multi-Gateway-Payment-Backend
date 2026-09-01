@@ -1,4 +1,4 @@
-# Unified Payment Flow & Lifecycle
+# Unified Payment Flow & Lifecycle (Phase 1)
 
 ## Overview
 
@@ -69,7 +69,7 @@ sequenceDiagram
    - Must not contain more than 2 decimal places (representing rupees and paise).
    - Financial conversions use exact minor currency units (paise) to eliminate IEEE 754 floating-point inaccuracies.
 2. **Currency Rules**:
-   - The system strictly enforces `currency === 'INR'`.
+   - Phase 1 strictly enforces `currency === 'INR'`.
 3. **Identity Derivation**:
    - The user ID is **never** accepted from the client request body. It is derived strictly from the verified JWT: `req.user.id`.
 

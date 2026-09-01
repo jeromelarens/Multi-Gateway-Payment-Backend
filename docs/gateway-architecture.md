@@ -61,7 +61,7 @@ gatewayResolver.resolve("UNKNOWN"); // Throws ApiError(400)
 
 ---
 
-## Supported Payment Gateways
+## Supported Gateways in Phase 1
 
 ### 1. Stripe Adapter (`stripe.gateway.js`)
 - **Protocol**: Stripe Node.js SDK

@@ -1,4 +1,4 @@
-# API Specification
+# API Specification (Phase 1)
 
 ## Base URL
 ```text
@@ -247,7 +247,7 @@ When an error occurs, the API returns a consistent JSON payload:
 
 ---
 
-## 4. Admin & Operational APIs
+## 4. Admin & Operational APIs (Phase 2)
 
 All `/api/v1/admin/*` endpoints require `Authorization: Bearer <JWT>` with role `ADMIN`.
 
