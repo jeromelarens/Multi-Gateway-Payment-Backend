@@ -1,0 +1,22 @@
+export const PAYMENT_STATUS = {
+  PENDING: "PENDING",
+  SUCCESS: "SUCCESS",
+  FAILED: "FAILED",
+  REFUNDED: "REFUNDED",
+};
+
+export const ORDER_STATUS = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  FAILED: "FAILED",
+  CANCELLED: "CANCELLED",
+};
+
+export const PAYMENT_METHOD = {
+  CARD: "CARD",
+  UPI: "UPI",
+  WALLET: "WALLET",
+  NETBANKING: "NETBANKING",
+};
+
+export const DEFAULT_CURRENCY = "INR";

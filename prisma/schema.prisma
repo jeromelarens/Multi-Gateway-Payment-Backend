@@ -1,0 +1,356 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PaymentGateway {
+  STRIPE
+  CASHFREE
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum WebhookEventStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  RETRYING
+  FAILED
+  DEAD_LETTER
+}
+
+enum LedgerEntryType {
+  PAYMENT
+  REFUND
+  PARTIAL_REFUND
+  ADJUSTMENT
+  FEE
+}
+
+enum LedgerDirection {
+  CREDIT
+  DEBIT
+}
+
+enum ReconciliationStatus {
+  MATCHED
+  MISMATCH
+  RESOLVED
+  MANUAL_REVIEW
+}
+
+enum ReconciliationDifferenceType {
+  STATUS_MISMATCH
+  AMOUNT_MISMATCH
+  MISSING_INTERNAL_PAYMENT
+  MISSING_GATEWAY_PAYMENT
+  CURRENCY_MISMATCH
+  UNKNOWN
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum PaymentMethod {
+  CARD
+  UPI
+  WALLET
+  NETBANKING
+}
+
+model User {
+  id       String  @id @default(cuid())
+  fullName String
+  email    String  @unique
+  password String?
+  phone    String?
+
+  role UserRole @default(USER)
+
+  stripeCustomerId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders             Order[]
+  payments           Payment[]
+  idempotencyKeys    IdempotencyKey[]
+  transactionLedgers TransactionLedger[]
+  auditLogs          AuditLog[]
+
+  @@index([email])
+}
+
+model Order {
+  id String @id @default(cuid())
+
+  orderNumber String @unique
+
+  amount Decimal @db.Decimal(12, 2)
+
+  currency String @default("INR")
+
+  status OrderStatus @default(PENDING)
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  payment Payment?
+
+  invoice Invoice?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Payment {
+  id String @id @default(cuid())
+
+  gateway PaymentGateway @default(STRIPE)
+
+  paymentIntentId String? @unique
+
+  clientSecret String?
+
+  gatewayOrderId String?
+
+  gatewayPaymentId String?
+
+  stripeChargeId String?
+
+  gatewayTransactionId String?
+
+  paymentMethodId String?
+
+  amount Decimal @db.Decimal(12, 2)
+
+  currency String
+
+  method PaymentMethod?
+
+  status PaymentStatus @default(PENDING)
+
+  failureReason String?
+
+  metadata Json?
+
+  orderId String @unique
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refunds Refund[]
+
+  transactionLedgers    TransactionLedger[]
+  reconciliationRecords ReconciliationRecord[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([paymentIntentId])
+  @@index([gateway])
+  @@index([gatewayOrderId])
+  @@index([gatewayPaymentId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Refund {
+  id String @id @default(cuid())
+
+  refundNumber   String? @unique
+  stripeRefundId String  @unique
+
+  amount Decimal @db.Decimal(12, 2)
+
+  reason String?
+
+  failureReason String?
+
+  status RefundStatus @default(PENDING)
+
+  paymentId String
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([paymentId])
+  @@index([status])
+}
+
+model Invoice {
+  id String @id @default(cuid())
+
+  invoiceNumber String @unique
+
+  receiptNumber String? @unique
+
+  pdfUrl String?
+
+  issuedAt DateTime?
+
+  orderId String @unique
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceNumber])
+}
+
+model WebhookEvent {
+  id           String             @id @default(cuid())
+  gateway      PaymentGateway     @default(STRIPE)
+  eventId      String
+  eventType    String
+  payload      Json
+  status       WebhookEventStatus @default(RECEIVED)
+  attempts     Int                @default(0)
+  lastAttemptAt DateTime?
+  nextRetryAt  DateTime?
+  failedAt     DateTime?
+  processed    Boolean            @default(false)
+  processedAt  DateTime?
+  errorMessage String?
+  receivedAt   DateTime           @default(now())
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@unique([gateway, eventId])
+  @@index([gateway, eventId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([createdAt])
+}
+
+model IdempotencyKey {
+  id             String   @id @default(cuid())
+  key            String
+  userId         String
+  endpoint       String
+  requestHash    String
+  status         String   // "PROCESSING" | "COMPLETED" | "FAILED"
+  responseStatus Int?
+  responseBody   Json?
+  resourceId     String?
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([expiresAt])
+  @@index([userId, key])
+}
+
+model TransactionLedger {
+  id                String          @id @default(cuid())
+  userId            String
+  orderId           String?
+  paymentId         String?
+  refundId          String?
+  type              LedgerEntryType
+  direction         LedgerDirection
+  amount            Decimal         @db.Decimal(12, 2)
+  currency          String          @default("INR")
+  gateway           PaymentGateway
+  idempotencyRef    String          @unique
+  externalReference String?
+  description       String?
+  metadata          Json?
+  createdAt         DateTime        @default(now())
+
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment           Payment?        @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([paymentId])
+  @@index([orderId])
+  @@index([type])
+  @@index([gateway])
+  @@index([createdAt])
+}
+
+model ReconciliationRecord {
+  id               String                        @id @default(cuid())
+  gateway          PaymentGateway
+  paymentId        String?
+  gatewayReference String?
+  internalStatus   String?
+  gatewayStatus    String?
+  internalAmount   Decimal?                      @db.Decimal(12, 2)
+  gatewayAmount    Decimal?                      @db.Decimal(12, 2)
+  currency         String                        @default("INR")
+  differenceType   ReconciliationDifferenceType
+  status           ReconciliationStatus          @default(MISMATCH)
+  resolution       String?
+  resolvedBy       String?
+  metadata         Json?
+  createdAt        DateTime                      @default(now())
+  resolvedAt       DateTime?
+
+  payment          Payment?                      @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([gateway])
+  @@index([status])
+  @@index([differenceType])
+  @@index([createdAt])
+  @@index([paymentId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  action      String
+  entityType  String
+  entityId    String?
+  requestId   String?
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
